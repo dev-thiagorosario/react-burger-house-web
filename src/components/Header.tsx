@@ -2,10 +2,13 @@ import logo from '../assets/logo.png'
 
 const Header = () => {
   return (
-    <header className="bg-[#161410]">
-      <div className="w-full max-w-[737px] mx-auto px-4 md:px-0 flex items-center justify-between gap-4" >
-        <img src={logo} alt="Casa do Hambúrguer" className="h-16 sm:h-20 w-auto" />
-        <button type="button" className="bg-[#F2DAAC] w-[120px] sm:w-[130px] h-[35px] shrink-0 flex items-center justify-center rounded-sm cursor-pointer" >
+    <header className="border-b border-white/5 bg-[#161410]">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <img src={logo} alt="Casa do Hambúrguer" className="h-16 w-auto sm:h-20" />
+        <button
+          type="button"
+          className="flex h-9 w-[112px] shrink-0 cursor-pointer items-center justify-center rounded-md bg-[#F2DAAC] text-sm font-semibold transition-opacity hover:opacity-90 sm:h-10 sm:w-[130px] sm:text-base"
+        >
           Order Now
         </button>
       </div>
