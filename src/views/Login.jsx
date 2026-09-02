@@ -1,19 +1,21 @@
-import { useState } from 'react'
 import logo from '../assets/logo.png'
 import Button from '../components/Button'
 import Input from '../components/Input'
+import { useLogin } from '../hooks/use-login'
 import { useNavigate } from 'react-router'
 
 const Login = () => {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-
-  const handleSubmit = (event) => {
-    event.preventDefault()
-
-    // A chamada de autenticação pode ser feita aqui usando email e password.
-  }
+  const {
+    email,
+    password,
+    error,
+    successMessage,
+    isLoading,
+    handleEmailChange,
+    handlePasswordChange,
+    handleSubmit,
+  } = useLogin()
 
   return (
     <main className="relative isolate flex min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-[#161410] px-4 py-8 sm:min-h-[calc(100svh-5rem)] sm:px-6 sm:py-10 lg:px-8">
@@ -91,7 +93,11 @@ const Login = () => {
             </p>
           </header>
 
-          <form className="mx-auto mt-8 flex w-full max-w-[400px] flex-col gap-5" onSubmit={handleSubmit}>
+          <form
+            className="mx-auto mt-8 flex w-full max-w-[400px] flex-col gap-5"
+            onSubmit={handleSubmit}
+            aria-busy={isLoading}
+          >
             <div>
               <label className="mb-1.5 block text-sm font-medium text-white/85" htmlFor="login-email">
                 E-mail
@@ -103,7 +109,8 @@ const Login = () => {
                 placeholder="voce@exemplo.com"
                 autoComplete="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={handleEmailChange}
+                disabled={isLoading}
                 required
               />
             </div>
@@ -119,10 +126,23 @@ const Login = () => {
                 placeholder="Digite sua senha"
                 autoComplete="current-password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={handlePasswordChange}
+                disabled={isLoading}
                 required
               />
             </div>
+
+            {error && (
+              <p className="-mt-2 text-sm text-red-400" role="alert">
+                {error}
+              </p>
+            )}
+
+            {successMessage && (
+              <p className="-mt-2 text-sm text-green-400" role="status">
+                {successMessage}
+              </p>
+            )}
 
             <div className="mt-2 flex flex-col gap-3">
               <Button
@@ -130,8 +150,9 @@ const Login = () => {
                 backgroundColor="#d9290f"
                 textColor="#ffffff"
                 borderColor="#d9290f"
+                disabled={isLoading}
               >
-                Login
+                {isLoading ? 'Entrando...' : 'Login'}
               </Button>
 
               <Button
@@ -140,6 +161,7 @@ const Login = () => {
                 textColor="#d9290f"
                 borderColor="#d9290f"
                 onClick={() => navigate('/register')}
+                disabled={isLoading}
               >
                 Não tenho uma conta
               </Button>
