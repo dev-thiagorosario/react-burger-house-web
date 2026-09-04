@@ -1,30 +1,27 @@
-import { useState } from 'react'
 import logo from '../assets/logo.png'
 import Button from '../components/Button'
 import Input from '../components/Input'
+import { useCreateUser } from '../hooks/create-user'
 import { useNavigate } from 'react-router'
+
+const FieldError = ({ id, message }) =>
+  message ? (
+    <p id={id} className="mt-1 text-sm text-red-400" role="alert">
+      {message}
+    </p>
+  ) : null
 
 const Register = () => {
   const navigate = useNavigate()
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [cep, setCep] = useState('')
-  const [passwordError, setPasswordError] = useState('')
-
-  const handleSubmit = (event) => {
-    event.preventDefault()
-
-    if (password !== confirmPassword) {
-      setPasswordError('As senhas não coincidem.')
-      return
-    }
-
-    setPasswordError('')
-
-    // A chamada de cadastro pode ser feita aqui.
-  }
+  const {
+    values,
+    fieldErrors,
+    requestError,
+    successMessage,
+    isLoading,
+    handleChange,
+    handleSubmit,
+  } = useCreateUser()
 
   return (
     <main className="relative isolate min-h-[calc(100svh-4rem)] overflow-hidden bg-[#161410] px-4 py-8 sm:min-h-[calc(100svh-5rem)] sm:px-6 sm:py-10 lg:flex lg:items-center lg:px-8">
@@ -115,7 +112,11 @@ const Register = () => {
             </p>
           </header>
 
-          <form className="mt-6 flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form
+            className="mt-6 flex flex-col gap-4"
+            onSubmit={handleSubmit}
+            aria-busy={isLoading}
+          >
             <div>
               <label className="mb-1.5 block text-sm font-medium text-white/85" htmlFor="full-name">
                 Nome completo
@@ -126,10 +127,14 @@ const Register = () => {
                 type="text"
                 placeholder="Digite seu nome"
                 autoComplete="name"
-                value={fullName}
-                onChange={(event) => setFullName(event.target.value)}
+                value={values.fullName}
+                onChange={handleChange}
+                aria-describedby={fieldErrors.fullName ? 'full-name-error' : undefined}
+                aria-invalid={Boolean(fieldErrors.fullName)}
+                disabled={isLoading}
                 required
               />
+              <FieldError id="full-name-error" message={fieldErrors.fullName} />
             </div>
 
             <div>
@@ -142,10 +147,14 @@ const Register = () => {
                 type="email"
                 placeholder="voce@exemplo.com"
                 autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                value={values.email}
+                onChange={handleChange}
+                aria-describedby={fieldErrors.email ? 'register-email-error' : undefined}
+                aria-invalid={Boolean(fieldErrors.email)}
+                disabled={isLoading}
                 required
               />
+              <FieldError id="register-email-error" message={fieldErrors.email} />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -157,12 +166,19 @@ const Register = () => {
                   id="register-password"
                   name="password"
                   type="password"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                   autoComplete="new-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  minLength={6}
+                  value={values.password}
+                  onChange={handleChange}
+                  aria-describedby={fieldErrors.password ? 'register-password-error' : undefined}
+                  aria-invalid={Boolean(fieldErrors.password)}
+                  minLength={8}
+                  disabled={isLoading}
                   required
+                />
+                <FieldError
+                  id="register-password-error"
+                  message={fieldErrors.password}
                 />
               </div>
 
@@ -176,20 +192,24 @@ const Register = () => {
                   type="password"
                   placeholder="Repita sua senha"
                   autoComplete="new-password"
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                  aria-describedby={passwordError ? 'password-error' : undefined}
-                  minLength={6}
+                  value={values.confirmPassword}
+                  onChange={handleChange}
+                  aria-describedby={
+                    fieldErrors.confirmPassword
+                      ? 'confirm-password-error'
+                      : undefined
+                  }
+                  aria-invalid={Boolean(fieldErrors.confirmPassword)}
+                  minLength={8}
+                  disabled={isLoading}
                   required
+                />
+                <FieldError
+                  id="confirm-password-error"
+                  message={fieldErrors.confirmPassword}
                 />
               </div>
             </div>
-
-            {passwordError && (
-              <p id="password-error" className="-mt-2 text-sm text-red-400" role="alert">
-                {passwordError}
-              </p>
-            )}
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-white/85" htmlFor="cep">
@@ -203,11 +223,27 @@ const Register = () => {
                 autoComplete="postal-code"
                 inputMode="numeric"
                 maxLength={9}
-                value={cep}
-                onChange={(event) => setCep(event.target.value)}
+                value={values.cep}
+                onChange={handleChange}
+                aria-describedby={fieldErrors.cep ? 'cep-error' : undefined}
+                aria-invalid={Boolean(fieldErrors.cep)}
+                disabled={isLoading}
                 required
               />
+              <FieldError id="cep-error" message={fieldErrors.cep} />
             </div>
+
+            {requestError && (
+              <p className="text-sm text-red-400" role="alert">
+                {requestError}
+              </p>
+            )}
+
+            {successMessage && (
+              <p className="text-sm text-green-400" role="status">
+                {successMessage}
+              </p>
+            )}
 
             <div className="mt-2 flex flex-col gap-3">
               <Button
@@ -215,8 +251,9 @@ const Register = () => {
                 backgroundColor="#d9290f"
                 textColor="#ffffff"
                 borderColor="#d9290f"
+                disabled={isLoading}
               >
-                Criar conta
+                {isLoading ? 'Criando conta...' : 'Criar conta'}
               </Button>
 
               <Button
@@ -225,6 +262,7 @@ const Register = () => {
                 textColor="#d9290f"
                 borderColor="#d9290f"
                 onClick={() => navigate('/login')}
+                disabled={isLoading}
               >
                 Já tenho uma conta
               </Button>
