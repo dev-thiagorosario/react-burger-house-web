@@ -1,11 +1,12 @@
-const apiUrl = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080')
+const apiUrl = (import.meta.env?.VITE_API_URL ?? 'http://localhost:8080')
   .replace(/\/$/, '')
 
 export class ApiRequestError extends Error {
-  constructor(message, issues = []) {
+  constructor(message, issues = [], status = null) {
     super(message)
     this.name = 'ApiRequestError'
     this.issues = issues
+    this.status = status
   }
 }
 
@@ -26,16 +27,13 @@ function getErrorMessage(payload, issues, fallbackMessage) {
   return payload?.message ?? fallbackMessage
 }
 
-export async function postJson(path, body, fallbackMessage) {
+async function requestJson(path, options, fallbackMessage) {
   let response
 
   try {
     response = await fetch(`${apiUrl}${path}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
+      ...options,
+      credentials: 'include',
     })
   } catch {
     throw new ApiRequestError(
@@ -47,12 +45,24 @@ export async function postJson(path, body, fallbackMessage) {
 
   if (!response.ok) {
     const issues = getIssues(payload)
-
     throw new ApiRequestError(
       getErrorMessage(payload, issues, fallbackMessage),
       issues,
+      response.status,
     )
   }
 
   return payload
+}
+
+export function postJson(path, body, fallbackMessage) {
+  return requestJson(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }, fallbackMessage)
+}
+
+export function getJson(path, fallbackMessage) {
+  return requestJson(path, { method: 'GET', cache: 'no-store' }, fallbackMessage)
 }
