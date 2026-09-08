@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { login } from '../services/auth-service'
+import { useAuth } from './use-auth'
 
-const TOKEN_STORAGE_KEY = 'burger-house:token'
-const USER_STORAGE_KEY = 'burger-house:user'
 
 export function useLogin() {
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -35,8 +34,7 @@ export function useLogin() {
     try {
       const result = await login({ email, password })
 
-      sessionStorage.setItem(TOKEN_STORAGE_KEY, result.token)
-      sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(result.user))
+      setPassword('')
       setSuccessMessage(result.message ?? 'Login realizado com sucesso.')
 
       return result

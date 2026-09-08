@@ -1,11 +1,13 @@
 import logo from '../assets/logo.png'
 import Button from '../components/Button'
 import Input from '../components/Input'
+import { useAuth } from '../hooks/use-auth'
 import { useLogin } from '../hooks/use-login'
 import { useNavigate } from 'react-router'
 
 const Login = () => {
   const navigate = useNavigate()
+  const { user, loading, sessionError, retrySession } = useAuth()
   const {
     email,
     password,
@@ -16,6 +18,24 @@ const Login = () => {
     handlePasswordChange,
     handleSubmit,
   } = useLogin()
+
+  if (loading || sessionError || user) {
+    return (
+      <main className="flex min-h-svh flex-col items-center justify-center gap-4 bg-[#161410] p-6 text-[#F2DAAC]">
+        {loading ? <p role="status">Verificando sua sessão...</p> : sessionError ? (
+          <>
+            <p role="alert">{sessionError}</p>
+            <Button onClick={retrySession}>Tentar novamente</Button>
+          </>
+        ) : (
+          <>
+            <h1 className="text-2xl font-bold">Olá, {user.fullName}!</h1>
+            <p role="status">Sua sessão está ativa.</p>
+          </>
+        )}
+      </main>
+    )
+  }
 
   return (
     <main className="relative isolate flex min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-[#161410] px-4 py-8 sm:min-h-[calc(100svh-5rem)] sm:px-6 sm:py-10 lg:px-8">
