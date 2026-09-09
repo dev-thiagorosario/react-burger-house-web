@@ -1,5 +1,7 @@
 import { Navigate, createBrowserRouter } from 'react-router'
 import App from '../App'
+import AuthRoute from '../components/AuthRoute'
+import Home from '../views/Home'
 import Login from '../views/Login'
 import Register from '../views/Register'
 
@@ -9,15 +11,22 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Navigate to="/login" replace />,
+        element: <Navigate to="/home" replace />,
       },
       {
-        path: '/login',
-        element: <Login />,
+        element: <AuthRoute guestOnly />,
+        children: [
+          { path: '/login', element: <Login /> },
+          { path: '/register', element: <Register /> },
+        ],
       },
       {
-        path: '/register',
-        element: <Register />,
+        element: <AuthRoute />,
+        children: [{ path: '/home', element: <Home /> }],
+      },
+      {
+        path: '*',
+        element: <Navigate to="/" replace />,
       },
     ],
   },
