@@ -6,7 +6,13 @@ function readUser(payload) {
     !['id', 'fullName', 'email', 'cep'].every((field) => typeof user[field] === 'string')) {
     throw new Error('O servidor retornou uma resposta de autenticação inválida.')
   }
-  return { id: user.id, fullName: user.fullName, email: user.email, cep: user.cep }
+  return {
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    cep: user.cep,
+    isAdmin: user.isAdmin === true,
+  }
 }
 
 export async function login(credentials) {

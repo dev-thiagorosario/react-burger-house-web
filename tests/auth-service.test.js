@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { login, getCurrentUser, logout } from '../src/services/auth-service.js'
 
 const originalFetch = globalThis.fetch
-const user = { id: '123', fullName: 'Maria Silva', email: 'maria@example.com', cep: '40000000' }
+const user = { id: '123', fullName: 'Maria Silva', email: 'maria@example.com', cep: '40000000', isAdmin: true }
 afterEach(() => { globalThis.fetch = originalFetch })
 
 test('logout envia cookie e aceita resposta sem conteúdo', async () => {
@@ -50,6 +50,13 @@ test('restaura usuário via GET com cookie e sem cache', async () => {
 test('preserva 401 para distinguir sessão ausente de falha no servidor', async () => {
   globalThis.fetch = async () => Response.json({ message: 'Unauthorized' }, { status: 401 })
   await assert.rejects(getCurrentUser(), { status: 401 })
+})
+
+test('usuário sem permissão explícita não é administrador', async () => {
+  for (const isAdmin of [false, undefined, null, 'false', 'true']) {
+    globalThis.fetch = async () => Response.json({ success: true, data: { user: { ...user, isAdmin } } })
+    assert.equal((await getCurrentUser()).isAdmin, false)
+  }
 })
 
 test('preserva erros de validação do login', async () => {
