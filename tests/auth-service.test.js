@@ -1,10 +1,28 @@
 import { test, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { login, getCurrentUser } from '../src/services/auth-service.js'
+import { login, getCurrentUser, logout } from '../src/services/auth-service.js'
 
 const originalFetch = globalThis.fetch
 const user = { id: '123', fullName: 'Maria Silva', email: 'maria@example.com', cep: '40000000' }
 afterEach(() => { globalThis.fetch = originalFetch })
+
+test('logout envia cookie e aceita resposta sem conteúdo', async () => {
+  globalThis.fetch = async (url, options) => {
+    assert.ok(url.endsWith('/logout'))
+    assert.equal(options.method, 'POST')
+    assert.equal(options.credentials, 'include')
+    return new Response(null, { status: 204 })
+  }
+  await logout()
+})
+
+test('logout informa falha quando o servidor não encerra a sessão', async () => {
+  globalThis.fetch = async () => new Response(null, { status: 503 })
+  await assert.rejects(logout(), {
+    status: 503,
+    message: 'Não foi possível encerrar sua sessão. Tente novamente.',
+  })
+})
 
 test('login aceita resposta sem JWT e envia credentials', async () => {
   globalThis.fetch = async (url, options) => {

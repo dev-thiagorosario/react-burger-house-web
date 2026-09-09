@@ -1,10 +1,25 @@
 import { createContext, useEffect, useRef, useState } from 'react'
-import { getCurrentUser, login as loginRequest } from '../services/auth-service'
+import { getCurrentUser, login as loginRequest, logout as logoutRequest } from '../services/auth-service'
 
-export const AuthContext = createContext(undefined)
+/**
+ * @typedef {Awaited<ReturnType<typeof getCurrentUser>>} User
+ * @typedef {Object} AuthState
+ * @property {User | null} user
+ * @property {boolean} loading
+ * @property {string} sessionError
+ * @property {() => void} retrySession
+ * @property {(credentials: {email: string, password: string}) => ReturnType<typeof loginRequest>} login
+ * @property {() => Promise<void>} logout
+ */
+
+export const AuthContext = createContext(
+  /** @type {AuthState | undefined} */ (undefined),
+)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(
+    /** @type {Awaited<ReturnType<typeof getCurrentUser>> | null} */ (null),
+  )
   const [loading, setLoading] = useState(true)
   const [sessionError, setSessionError] = useState('')
   const [sessionAttempt, setSessionAttempt] = useState(0)
@@ -55,8 +70,16 @@ export function AuthProvider({ children }) {
     return result
   }
 
+  async function logout() {
+    await logoutRequest()
+    ++sessionVersion.current
+    setUser(null)
+    setSessionError('')
+    setLoading(false)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, sessionError, retrySession, login }}>
+    <AuthContext.Provider value={{ user, loading, sessionError, retrySession, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

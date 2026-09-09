@@ -20,7 +20,13 @@ Configure `VITE_API_URL` no `.env` com a URL do backend (padrão: `http://localh
 - Ao iniciar, `GET /auth/me` restaura a sessão. `401` significa sessão ausente ou expirada; outros erros exibem uma opção de tentar novamente na tela de login.
 - A tela de login aguarda a restauração e mostra uma confirmação quando o usuário está autenticado.
 - O frontend não lê o cookie nem armazena JWT. As antigas chaves `burger-house:token` e `burger-house:user` são removidas do sessionStorage na inicialização.
-- Logout depende da implementação de `POST /logout` no backend. Limpar apenas o contexto não encerraria a sessão no servidor.
+- O botão Sair chama `POST /logout` e limpa o usuário do contexto apenas após uma resposta HTTP de sucesso. O backend precisa implementar esse endpoint e invalidar o cookie da sessão. Falhas mantêm o usuário autenticado e exibem uma mensagem na página Home.
+
+## Header
+
+- As ações ficam em uma segunda linha em telas menores e na mesma linha em telas grandes, com nomes longos truncados e controles acessíveis por teclado.
+- O Header é um componente de apresentação: recebe `userName`, `homePath`, `isLoggingOut` e callbacks `onCreateClick` e `onLogoutClick`. Os links de Cardápio, Pedidos e Carrinho apontam para `/cardapio`, `/pedidos` e `/carrinhos`, respectivamente. Botões sem callback ficam desabilitados.
+- A página Home fornece os dados de autenticação e controla a saída e seus erros. O Header não acessa o contexto de autenticação nem gerencia diálogos ou requisições.
 
 ## Validar com o backend
 

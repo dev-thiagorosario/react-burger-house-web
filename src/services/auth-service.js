@@ -18,3 +18,7 @@ export async function getCurrentUser() {
   const payload = await getJson('/auth/me', 'Não foi possível verificar sua sessão.')
   return readUser(payload)
 }
+
+export async function logout() {
+  await postJson('/logout', {}, 'Não foi possível encerrar sua sessão. Tente novamente.')
+}
