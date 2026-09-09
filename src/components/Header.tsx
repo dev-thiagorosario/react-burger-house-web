@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router'
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCartPlus } from 'lucide-react'
+import { useAuth } from '../hooks/use-auth'
 import logo from '../assets/logo.png'
 
 const baseItemClassName =
@@ -23,6 +24,7 @@ const Header = ({
   isLoggingOut = false,
 }: HeaderProps) => {
   const location = useLocation()
+  const { user } = useAuth()
 
   const getNavItemClass = (path: string) => {
     return location.pathname === path
@@ -60,60 +62,62 @@ const Header = ({
           </button>
         </div>
 
-        <nav aria-label="Ações principais" className="grid w-full grid-cols-4 gap-2 lg:order-2 lg:flex lg:w-auto lg:shrink-0">
-          <Link
-            to="/cardapio"
-            aria-label="Cardápio"
-            title="Cardápio"
-            className={getNavItemClass('/cardapio')}
-            aria-current={location.pathname === '/cardapio' ? 'page' : undefined}
-          >
-            <Box className="size-5 shrink-0" aria-hidden="true" />
-            <span className="hidden text-sm sm:inline lg:hidden xl:inline">
-              Cardápio
-            </span>
-          </Link>
+        {user?.isAdmin === true && (
+          <nav aria-label="Ações principais" className="grid w-full grid-cols-4 gap-2 lg:order-2 lg:flex lg:w-auto lg:shrink-0">
+            <Link
+              to="/cardapio"
+              aria-label="Cardápio"
+              title="Cardápio"
+              className={getNavItemClass('/cardapio')}
+              aria-current={location.pathname === '/cardapio' ? 'page' : undefined}
+            >
+              <Box className="size-5 shrink-0" aria-hidden="true" />
+              <span className="hidden text-sm sm:inline lg:hidden xl:inline">
+                Cardápio
+              </span>
+            </Link>
 
-          <Link
-            to="/pedidos"
-            aria-label="Pedidos"
-            title="Pedidos"
-            className={getNavItemClass('/pedidos')}
-            aria-current={location.pathname === '/pedidos' ? 'page' : undefined}
-          >
-            <LayoutDashboard className="size-5 shrink-0" aria-hidden="true" />
-            <span className="hidden text-sm sm:inline lg:hidden xl:inline">
-              Pedidos
-            </span>
-          </Link>
+            <Link
+              to="/pedidos"
+              aria-label="Pedidos"
+              title="Pedidos"
+              className={getNavItemClass('/pedidos')}
+              aria-current={location.pathname === '/pedidos' ? 'page' : undefined}
+            >
+              <LayoutDashboard className="size-5 shrink-0" aria-hidden="true" />
+              <span className="hidden text-sm sm:inline lg:hidden xl:inline">
+                Pedidos
+              </span>
+            </Link>
 
-          <button
-            type="button"
-            onClick={onCreateClick}
-            disabled={!onCreateClick}
-            aria-label="Adicionar produto"
-            title="Adicionar produto"
-            className={actionClassName}
-          >
-            <Plus className="size-5 shrink-0" aria-hidden="true" />
-            <span className="hidden text-sm sm:inline lg:hidden xl:inline">
-              Adicionar produto
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={onCreateClick}
+              disabled={!onCreateClick}
+              aria-label="Adicionar produto"
+              title="Adicionar produto"
+              className={actionClassName}
+            >
+              <Plus className="size-5 shrink-0" aria-hidden="true" />
+              <span className="hidden text-sm sm:inline lg:hidden xl:inline">
+                Adicionar produto
+              </span>
+            </button>
 
-          <Link
-            to="/carrinhos"
-            aria-label="Carrinho"
-            title="Carrinho"
-            className={getNavItemClass('/carrinhos')}
-            aria-current={location.pathname === '/carrinhos' ? 'page' : undefined}
-          >
-            <ShoppingCartPlus className="size-5 shrink-0" aria-hidden="true" />
-            <span className="hidden text-sm sm:inline lg:hidden xl:inline">
-              Carrinho
-            </span>
-          </Link>
-        </nav>
+            <Link
+              to="/carrinhos"
+              aria-label="Carrinho"
+              title="Carrinho"
+              className={getNavItemClass('/carrinhos')}
+              aria-current={location.pathname === '/carrinhos' ? 'page' : undefined}
+            >
+              <ShoppingCartPlus className="size-5 shrink-0" aria-hidden="true" />
+              <span className="hidden text-sm sm:inline lg:hidden xl:inline">
+                Carrinho
+              </span>
+            </Link>
+          </nav>
+        )}
       </div>
     </header>
   )
