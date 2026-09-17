@@ -22,6 +22,15 @@ Configure `VITE_API_URL` no `.env` com a URL do backend (padrão: `http://localh
 - O frontend não lê o cookie nem armazena JWT. As antigas chaves `burger-house:token` e `burger-house:user` são removidas do sessionStorage na inicialização.
 - O botão Sair chama `POST /logout` e limpa o usuário do contexto apenas após uma resposta HTTP de sucesso. O backend precisa implementar esse endpoint e invalidar o cookie da sessão. Falhas mantêm o usuário autenticado e exibem uma mensagem na página Home.
 
+## Cardápio
+
+- A página consulta `GET /list-products` e lê `{ success: true, data: { products: [...] } }`.
+- Exibe somente produtos com `isActive: true`, agrupados por `categoryId`: 1 = Hambúrgueres, 2 = Porções e 3 = Bebidas. IDs desconhecidos aparecem como “Categoria N”.
+- Os cards usam `name`, `description`, `price` (em reais), `imageAlt` e as URLs de `images[]`, selecionadas por `variant: desktop | mobile`. O formato anterior com `imageUrl` e `mobileImageUrl` também é aceito.
+- URLs de imagens absolutas são preservadas; caminhos relativos são resolvidos contra `VITE_API_URL`. O backend deve servir esses arquivos estáticos.
+- Há estados de carregamento, cardápio/categoria vazia e erro com botão para tentar novamente.
+- Cadastro, edição, exclusão e consulta individual de produtos não são utilizados nesta etapa.
+
 ## Header
 
 - As ações ficam em uma segunda linha em telas menores e na mesma linha em telas grandes, com nomes longos truncados e controles acessíveis por teclado.
@@ -43,7 +52,7 @@ Use `localhost` consistentemente no frontend e no backend durante o desenvolvime
 ```sh
 npm run build
 npm run lint
-node --test tests/auth-service.test.js
+node --test tests/*.test.js
 ```
 
 Os testes usam respostas HTTP simuladas e verificam os contratos, credentials, erros e dados públicos; a aceitação real do cookie e o CORS precisam ser validados no navegador com o backend ativo.
