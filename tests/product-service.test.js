@@ -92,3 +92,60 @@ test('informa falha de conexão', async () => {
   globalThis.fetch = async () => { throw new TypeError('Failed to fetch') }
   await assert.rejects(listProducts(), /Não foi possível conectar ao servidor/)
 })
+
+test('exclui pelo ID na rota correta com cookie e aceita 204 sem JSON', async () => {
+  const { deleteProduct } = await import('../src/services/product-service.js')
+  globalThis.fetch = async (url, options) => {
+    assert.equal(url, 'http://localhost:8080/delete-products/bacon-bbq')
+    assert.equal(options.method, 'DELETE')
+    assert.equal(options.credentials, 'include')
+    assert.equal(options.body, undefined)
+    return new Response(null, { status: 204 })
+  }
+  assert.equal(await deleteProduct('bacon-bbq'), null)
+})
+
+test('envia PATCH somente com as alterações e preserva preço e categoria numéricos', async () => {
+  const { updateProduct } = await import('../src/services/product-service.js')
+  const changes = { name: 'Bacon especial', price: 42.5, categoryId: 2, description: '' }
+  globalThis.fetch = async (url, options) => {
+    assert.equal(url, 'http://localhost:8080/update-products/bacon-bbq')
+    assert.equal(options.method, 'PATCH')
+    assert.equal(options.credentials, 'include')
+    assert.equal(options.headers['Content-Type'], 'application/json')
+    assert.deepEqual(JSON.parse(options.body), changes)
+    return Response.json({ success: true, data: { product: { ...product, ...changes } } })
+  }
+  assert.deepEqual(await updateProduct('bacon-bbq', changes), { ...product, ...changes })
+})
+
+test('propaga erros de exclusão sem sinalizar sucesso', async () => {
+  const { deleteProduct } = await import('../src/services/product-service.js')
+  for (const status of [401, 403, 404, 500]) {
+    globalThis.fetch = async () => Response.json({ success: false, message: 'Exclusão recusada.' }, { status })
+    await assert.rejects(deleteProduct('bacon-bbq'), { status, message: 'Exclusão recusada.' })
+  }
+})
+
+test('preserva os erros de validação retornados pelo PATCH e permite nova tentativa', async () => {
+  const { updateProduct } = await import('../src/services/product-service.js')
+  globalThis.fetch = async () => Response.json({ success: false, errors: [{ field: 'body.categoryId', message: 'Categoria inválida.' }] }, { status: 400 })
+  await assert.rejects(updateProduct('bacon-bbq', { categoryId: 42 }), { status: 400, message: 'Categoria inválida.' })
+  globalThis.fetch = async () => Response.json({ success: true, data: { product } })
+  assert.deepEqual(await updateProduct('bacon-bbq', { categoryId: 1 }), product)
+})
+
+test('rejeita confirmação de atualização incompleta ou de outro produto', async () => {
+  const { updateProduct } = await import('../src/services/product-service.js')
+  for (const payload of [null, { success: false }, { success: true, data: { product: { id: 'bacon-bbq' } } }, { success: true, data: { product: { ...product, id: 'other' } } }]) {
+    globalThis.fetch = async () => Response.json(payload)
+    await assert.rejects(updateProduct('bacon-bbq', { price: 20 }), /não confirmou/)
+  }
+})
+
+test('informa falhas de rede nas mutações', async () => {
+  const { deleteProduct, updateProduct } = await import('../src/services/product-service.js')
+  globalThis.fetch = async () => { throw new TypeError('Failed to fetch') }
+  await assert.rejects(deleteProduct('bacon-bbq'), /Não foi possível conectar/)
+  await assert.rejects(updateProduct('bacon-bbq', { price: 20 }), /Não foi possível conectar/)
+})
