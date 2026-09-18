@@ -1,4 +1,5 @@
-import { ShoppingBag } from 'lucide-react'
+import { Pencil, ShoppingBag, Trash2 } from 'lucide-react'
+import { useAuth } from '../hooks/use-auth'
 
 type ProductProps = {
   title: string
@@ -7,6 +8,8 @@ type ProductProps = {
   mobileImage?: string
   imageAlt?: string
   onAddToCart?: () => void
+  onUpdate?: () => void
+  onDelete?: () => void
   price: number
 }
 
@@ -15,7 +18,9 @@ const priceFormatter = new Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
 })
 
-const Product = ({ title, description, image, mobileImage, imageAlt = title, price, onAddToCart }: ProductProps) => {
+const Product = ({ title, description, image, mobileImage, imageAlt = title, price, onAddToCart, onUpdate, onDelete }: ProductProps) => {
+  const { user } = useAuth()
+
   return (
     <article className="grid h-full w-full min-w-0 grid-cols-[100px_minmax(0,1fr)] items-start gap-x-4 gap-y-4 rounded-2xl border border-[#F2DAAC]/15 bg-[#211E18] p-4 shadow-lg shadow-black/10 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-x-5 sm:gap-y-3 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-x-6">
       <picture className="block overflow-hidden rounded-xl sm:row-span-3">
@@ -37,6 +42,32 @@ const Product = ({ title, description, image, mobileImage, imageAlt = title, pri
       </p>
 
       <div className="col-span-2 flex min-w-0 flex-wrap items-center justify-between gap-3 self-end border-t border-[#F2DAAC]/10 pt-4 sm:col-span-1 sm:col-start-2">
+        {user?.isAdmin === true && (
+          <div className="flex w-full flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              onClick={onUpdate}
+              disabled={!onUpdate}
+              aria-label={`Atualizar ${title}`}
+              title={onUpdate ? 'Atualizar produto' : 'Atualização indisponível no momento'}
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#F2DAAC]/30 px-3 text-xs font-semibold text-[#F2DAAC] transition-colors enabled:cursor-pointer enabled:hover:bg-[#F2DAAC]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F2DAAC] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Pencil aria-hidden="true" className="size-3.5" strokeWidth={1.8} />
+              Atualizar
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={!onDelete}
+              aria-label={`Deletar ${title}`}
+              title={onDelete ? 'Deletar produto' : 'Exclusão indisponível no momento'}
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-red-400/30 px-3 text-xs font-semibold text-red-300 transition-colors enabled:cursor-pointer enabled:hover:bg-red-400/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Trash2 aria-hidden="true" className="size-3.5" strokeWidth={1.8} />
+              Deletar
+            </button>
+          </div>
+        )}
         <span className="min-w-0 text-lg font-bold text-[#F2DAAC] tabular-nums [overflow-wrap:anywhere] sm:text-xl">
           {priceFormatter.format(price)}
         </span>

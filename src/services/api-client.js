@@ -27,7 +27,7 @@ function getErrorMessage(payload, issues, fallbackMessage) {
   return payload?.message ?? fallbackMessage
 }
 
-async function requestJson(path, options, fallbackMessage) {
+export async function requestJson(path, options, fallbackMessage) {
   let response
 
   try {

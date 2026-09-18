@@ -5,6 +5,9 @@ import CategoryTab from '../components/CategoryTab'
 import Product from '../components/Product'
 import SectionTitle from '../components/SectionTitle'
 import { listProducts } from '../services/product-service'
+import ProductFormModal from '../form/ProductFormModal'
+import DeleteProductModal from '../form/DeleteProductModal'
+import UpdateProductFormModal from '../form/UpdateProductFormModal'
 
 const menuCategories = [
   { id: 'all', label: 'Todos' },
@@ -14,6 +17,10 @@ const menuCategories = [
 ]
 
 const Home = () => {
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
+  const [productToDelete, setProductToDelete] = useState(null)
+  const [productToUpdate, setProductToUpdate] = useState(null)
+  const [actionMessage, setActionMessage] = useState('')
   const { user, logout } = useAuth()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState('')
@@ -87,9 +94,10 @@ const Home = () => {
         userName={user?.fullName}
         onLogoutClick={handleLogout}
         isLoggingOut={isLoggingOut}
+        onCreateClick={() => setIsProductModalOpen(true)}
       />
 
-      <main className="mx-auto w-full max-w-6xl px-4 pb-8 sm:px-6 lg:px-8">
+      <main tabIndex={-1} className="mx-auto w-full max-w-6xl px-4 pb-8 sm:px-6 lg:px-8">
         <div
           role="group"
           aria-label="Categorias do cardápio"
@@ -106,6 +114,7 @@ const Home = () => {
         </div>
 
         <h1 className="sr-only">Cardápio</h1>
+        {actionMessage && <p role="status" className="py-3 text-sm text-[#F2DAAC]">{actionMessage}</p>}
         {loadingProducts && <p role="status" className="py-6 text-[#C5BDAF]">Carregando cardápio...</p>}
         {productsError && (
           <div role="alert" className="space-y-3 py-6 text-red-300">
@@ -139,6 +148,8 @@ const Home = () => {
                     mobileImage={product.mobileImageUrl}
                     imageAlt={product.imageAlt}
                     price={product.price}
+                    onDelete={user?.isAdmin === true ? () => { setActionMessage(''); setProductToDelete(product) } : undefined}
+                    onUpdate={user?.isAdmin === true ? () => { setActionMessage(''); setProductToUpdate(product) } : undefined}
                   />
                 ))}
               </div>
@@ -153,6 +164,34 @@ const Home = () => {
           </p>
         )}
       </main>
+      <ProductFormModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+      />
+      {user?.isAdmin === true && productToDelete && (
+        <DeleteProductModal
+          key={productToDelete.id}
+          product={productToDelete}
+          onClose={() => setProductToDelete(null)}
+          onDeleted={(id) => {
+            setProducts((current) => current.filter((product) => product.id !== id))
+            setProductToDelete(null)
+            setActionMessage('Produto excluído com sucesso.')
+          }}
+        />
+      )}
+      {user?.isAdmin === true && productToUpdate && (
+        <UpdateProductFormModal
+          key={productToUpdate.id}
+          product={productToUpdate}
+          onClose={() => setProductToUpdate(null)}
+          onUpdated={(updated) => {
+            setProducts((current) => current.map((product) => product.id === updated.id ? { ...product, ...updated } : product))
+            setProductToUpdate(null)
+            setActionMessage('Produto atualizado com sucesso.')
+          }}
+        />
+      )}
     </>
   )
 }
