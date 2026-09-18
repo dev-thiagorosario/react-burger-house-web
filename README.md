@@ -31,11 +31,13 @@ Configure `VITE_API_URL` no `.env` com a URL do backend (padrão: `http://localh
 - Há estados de carregamento, cardápio/categoria vazia e erro com botão para tentar novamente.
 - Cadastro, edição, exclusão e consulta individual de produtos não são utilizados nesta etapa.
 
-## Header
+## Header e carrinho
 
-- As ações ficam em uma segunda linha em telas menores e na mesma linha em telas grandes, com nomes longos truncados e controles acessíveis por teclado.
-- O Header é um componente de apresentação: recebe `userName`, `homePath`, `isLoggingOut` e callbacks `onCreateClick` e `onLogoutClick`. Os links de Cardápio, Pedidos e Carrinho apontam para `/cardapio`, `/pedidos` e `/carrinhos`, respectivamente. Botões sem callback ficam desabilitados.
-- A página Home fornece os dados de autenticação e controla a saída e seus erros. O Header não acessa o contexto de autenticação nem gerencia diálogos ou requisições.
+- Cardápio, Pedidos e Adicionar produto continuam visíveis apenas para administradores. O botão Carrinho fica disponível para todos os usuários autenticados.
+- O carrinho abre em um painel lateral responsivo, sem navegar para uma rota. Fecha pelo botão, pela tecla Escape ou pelo fundo; mantém o foco dentro do painel e bloqueia a rolagem da página enquanto aberto.
+- `Cart.jsx` apresenta os estados vazio e preenchido; `CartItem.tsx` exibe imagem, nome, preço unitário, quantidade, subtotal e remoção.
+- Os botões dos produtos alimentam uma seleção **temporária em memória**, controlada por `CartProvider`, para experimentar a interface. Quantidades, subtotais e total são apenas uma prévia visual. A seleção é preservada entre páginas, mas é descartada ao recarregar ou trocar de usuário.
+- Não há chamadas à API de carrinho, persistência ou criação de pedidos nesta etapa. O botão Finalizar pedido permanece desabilitado com a indicação de disponibilidade futura. Na integração, o backend será responsável por validar produtos e quantidades, calcular preços e totais e criar o pedido.
 
 ## Validar com o backend
 

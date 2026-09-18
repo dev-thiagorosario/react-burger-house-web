@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import { useAuth } from '../hooks/use-auth'
+import { useCart } from '../hooks/use-cart'
 import CategoryTab from '../components/CategoryTab'
 import Product from '../components/Product'
 import SectionTitle from '../components/SectionTitle'
@@ -17,6 +18,7 @@ const menuCategories = [
 ]
 
 const Home = () => {
+  const { addItem } = useCart()
   const [isProductModalOpen, setIsProductModalOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState(null)
   const [productToUpdate, setProductToUpdate] = useState(null)
@@ -148,6 +150,7 @@ const Home = () => {
                     mobileImage={product.mobileImageUrl}
                     imageAlt={product.imageAlt}
                     price={product.price}
+                    onAddToCart={() => addItem(product)}
                     onDelete={user?.isAdmin === true ? () => { setActionMessage(''); setProductToDelete(product) } : undefined}
                     onUpdate={user?.isAdmin === true ? () => { setActionMessage(''); setProductToUpdate(product) } : undefined}
                   />

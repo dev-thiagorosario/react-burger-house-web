@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Header from '../components/Header'
 import CategoryTab from '../components/CategoryTab'
 import Order from '../components/Order'
+import ProductFormModal from '../form/ProductFormModal'
 import { useAuth } from '../hooks/use-auth'
 
 const categories = [
@@ -54,6 +55,7 @@ const initialOrders = [
 ]
 
 const Orders = () => {
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
   const { user, logout } = useAuth()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState('')
@@ -95,6 +97,7 @@ const Orders = () => {
         userName={user?.fullName}
         onLogoutClick={handleLogout}
         isLoggingOut={isLoggingOut}
+        onCreateClick={() => setIsProductModalOpen(true)}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-8 sm:px-6 lg:px-8">
@@ -139,9 +142,12 @@ const Orders = () => {
           </p>
         )}
       </main>
+      <ProductFormModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+      />
     </>
   )
 }
 
 export default Orders
-
