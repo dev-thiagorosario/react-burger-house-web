@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router'
 import { Box, LayoutDashboard, LogOut, Plus, ShoppingCartPlus } from 'lucide-react'
 import { useAuth } from '../hooks/use-auth'
 import logo from '../assets/logo.png'
+import { useCart } from '../hooks/use-cart'
 
 const baseItemClassName =
   'inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg border border-[#F2DAAC]/25 px-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F2DAAC] disabled:cursor-not-allowed disabled:opacity-50'
@@ -23,6 +24,7 @@ const Header = ({
   onLogoutClick,
   isLoggingOut = false,
 }: HeaderProps) => {
+  const { openCart, isOpen, itemCount } = useCart()
   const location = useLocation()
   const { user } = useAuth()
 
@@ -51,6 +53,20 @@ const Header = ({
           )}
           <button
             type="button"
+            onClick={openCart}
+            aria-label={itemCount > 0 ? `Abrir carrinho, ${itemCount} itens` : 'Abrir carrinho'}
+            aria-haspopup="dialog"
+            aria-expanded={isOpen}
+            aria-controls="shopping-cart"
+            title="Meu carrinho"
+            className={`${actionClassName} relative shrink-0 cursor-pointer`}
+          >
+            <ShoppingCartPlus className="size-5" aria-hidden="true" />
+            <span className="hidden text-sm sm:inline">Carrinho</span>
+            {itemCount > 0 && <span aria-hidden="true" className="absolute -right-2 -top-2 flex min-w-5 items-center justify-center rounded-full bg-[#BB2D13] px-1.5 py-0.5 text-[10px] font-bold text-white">{itemCount > 99 ? '99+' : itemCount}</span>}
+          </button>
+          <button
+            type="button"
             onClick={onLogoutClick}
             disabled={isLoggingOut || !onLogoutClick}
             aria-label={isLoggingOut ? 'Encerrando sessão' : 'Sair'}
@@ -63,7 +79,7 @@ const Header = ({
         </div>
 
         {user?.isAdmin === true && (
-          <nav aria-label="Ações principais" className="grid w-full grid-cols-4 gap-2 lg:order-2 lg:flex lg:w-auto lg:shrink-0">
+          <nav aria-label="Ações principais" className="grid w-full grid-cols-3 gap-2 lg:order-2 lg:flex lg:w-auto lg:shrink-0">
             <Link
               to="/cardapio"
               aria-label="Cardápio"
@@ -104,18 +120,6 @@ const Header = ({
               </span>
             </button>
 
-            <Link
-              to="/carrinhos"
-              aria-label="Carrinho"
-              title="Carrinho"
-              className={getNavItemClass('/carrinhos')}
-              aria-current={location.pathname === '/carrinhos' ? 'page' : undefined}
-            >
-              <ShoppingCartPlus className="size-5 shrink-0" aria-hidden="true" />
-              <span className="hidden text-sm sm:inline lg:hidden xl:inline">
-                Carrinho
-              </span>
-            </Link>
           </nav>
         )}
       </div>
