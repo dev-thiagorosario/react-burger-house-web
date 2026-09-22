@@ -5,8 +5,8 @@ export type CartItemData = {
   name: string
   imageUrl: string | null
   quantity: number
-  unitPrice: number
-  subtotal: number
+  unitPrice: number | null
+  subtotal: number | null
 }
 
 type Props = {
@@ -29,7 +29,7 @@ export default function CartItem({ item, disabled, onQuantityChange, onRemove }:
         <div className="flex items-start justify-between gap-1">
           <div className="min-w-0">
             <h3 className="font-bold leading-snug [overflow-wrap:anywhere]">{item.name}</h3>
-            <p className="mt-1 text-xs text-[#6C4D30]">{money.format(item.unitPrice)} por unidade</p>
+            <p className="mt-1 text-xs text-[#6C4D30]">{item.unitPrice === null ? 'Preço a confirmar' : `${money.format(item.unitPrice)} por unidade`}</p>
           </div>
           <button type="button" disabled={disabled} onClick={onRemove} aria-label={`Remover ${item.name} do carrinho`} className={`${controlClass} -mr-2 -mt-2 text-[#A82B16] enabled:hover:bg-[#A82B16]/10`}>
             <Trash2 className="size-4" aria-hidden="true" />
@@ -41,7 +41,7 @@ export default function CartItem({ item, disabled, onQuantityChange, onRemove }:
             <span className="min-w-6 text-center text-sm font-bold tabular-nums" aria-label={`${item.quantity} unidades`}>{item.quantity}</span>
             <button type="button" disabled={disabled} onClick={() => onQuantityChange(item.quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className={`${controlClass} enabled:hover:bg-white/40`}><Plus className="size-4" aria-hidden="true" /></button>
           </div>
-          <p className="text-sm font-bold tabular-nums">{money.format(item.subtotal)}</p>
+          <p className="text-sm font-bold tabular-nums">{item.subtotal === null ? '—' : money.format(item.subtotal)}</p>
         </div>
       </div>
     </li>
