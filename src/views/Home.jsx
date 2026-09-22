@@ -6,19 +6,13 @@ import CategoryTab from '../components/CategoryTab'
 import Product from '../components/Product'
 import SectionTitle from '../components/SectionTitle'
 import { listProducts } from '../services/product-service'
+import { listCategories } from '../services/category-service'
 import ProductFormModal from '../form/ProductFormModal'
 import DeleteProductModal from '../form/DeleteProductModal'
 import UpdateProductFormModal from '../form/UpdateProductFormModal'
 
-const menuCategories = [
-  { id: 'all', label: 'Todos' },
-  { id: 1, label: 'Hambúrgueres' },
-  { id: 3, label: 'Bebidas' },
-  { id: 2, label: 'Porções' },
-]
-
 const Home = () => {
-  const { addItem } = useCart()
+  const { addItem, isSubmitting } = useCart()
   const [isProductModalOpen, setIsProductModalOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState(null)
   const [productToUpdate, setProductToUpdate] = useState(null)
@@ -28,6 +22,7 @@ const Home = () => {
   const [logoutError, setLogoutError] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [products, setProducts] = useState([])
+  const [menuCategories, setMenuCategories] = useState([])
   const [loadingProducts, setLoadingProducts] = useState(true)
   const [productsError, setProductsError] = useState('')
   const [productsAttempt, setProductsAttempt] = useState(0)
@@ -37,8 +32,14 @@ const Home = () => {
 
     async function loadProducts() {
       try {
-        const result = await listProducts()
-        if (active) setProducts(result)
+        const [productsResult, categoriesResult] = await Promise.all([
+          listProducts(),
+          listCategories(),
+        ])
+        if (active) {
+          setProducts(productsResult)
+          setMenuCategories(categoriesResult.map(({ id, name }) => ({ id, label: name })))
+        }
       } catch (error) {
         if (active) setProductsError(error instanceof Error ? error.message : 'Não foi possível carregar o cardápio.')
       } finally {
@@ -57,6 +58,7 @@ const Home = () => {
   }
 
   const categories = [
+    { id: 'all', label: 'Todos' },
     ...menuCategories,
     ...[...new Set(products.map((product) => product.categoryId))]
       .filter((id) => !menuCategories.some((category) => category.id === id))
@@ -150,7 +152,7 @@ const Home = () => {
                     mobileImage={product.mobileImageUrl}
                     imageAlt={product.imageAlt}
                     price={product.price}
-                    onAddToCart={() => addItem(product)}
+                    onAddToCart={isSubmitting ? undefined : () => addItem(product)}
                     onDelete={user?.isAdmin === true ? () => { setActionMessage(''); setProductToDelete(product) } : undefined}
                     onUpdate={user?.isAdmin === true ? () => { setActionMessage(''); setProductToUpdate(product) } : undefined}
                   />

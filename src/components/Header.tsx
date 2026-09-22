@@ -78,20 +78,22 @@ const Header = ({
           </button>
         </div>
 
-        {user?.isAdmin === true && (
-          <nav aria-label="Ações principais" className="grid w-full grid-cols-3 gap-2 lg:order-2 lg:flex lg:w-auto lg:shrink-0">
-            <Link
-              to="/cardapio"
-              aria-label="Cardápio"
-              title="Cardápio"
-              className={getNavItemClass('/cardapio')}
-              aria-current={location.pathname === '/cardapio' ? 'page' : undefined}
-            >
-              <Box className="size-5 shrink-0" aria-hidden="true" />
-              <span className="hidden text-sm sm:inline lg:hidden xl:inline">
-                Cardápio
-              </span>
-            </Link>
+        {user && (
+          <nav aria-label="Ações principais" className={`grid w-full gap-2 lg:order-2 lg:flex lg:w-auto lg:shrink-0 ${user.isAdmin === true ? 'grid-cols-3' : 'grid-cols-1'}`}>
+            {user.isAdmin === true && (
+              <Link
+                to="/home"
+                aria-label="Cardápio"
+                title="Cardápio"
+                className={getNavItemClass('/home')}
+                aria-current={location.pathname === '/home' ? 'page' : undefined}
+              >
+                <Box className="size-5 shrink-0" aria-hidden="true" />
+                <span className="hidden text-sm sm:inline lg:hidden xl:inline">
+                  Cardápio
+                </span>
+              </Link>
+            )}
 
             <Link
               to="/pedidos"
@@ -106,19 +108,21 @@ const Header = ({
               </span>
             </Link>
 
-            <button
-              type="button"
-              onClick={onCreateClick}
-              disabled={!onCreateClick}
-              aria-label="Adicionar produto"
-              title="Adicionar produto"
-              className={actionClassName}
-            >
-              <Plus className="size-5 shrink-0" aria-hidden="true" />
-              <span className="hidden text-sm sm:inline lg:hidden xl:inline">
-                Adicionar produto
-              </span>
-            </button>
+            {user.isAdmin === true && (
+              <button
+                type="button"
+                onClick={onCreateClick}
+                disabled={!onCreateClick}
+                aria-label="Adicionar produto"
+                title="Adicionar produto"
+                className={actionClassName}
+              >
+                <Plus className="size-5 shrink-0" aria-hidden="true" />
+                <span className="hidden text-sm sm:inline lg:hidden xl:inline">
+                  Adicionar produto
+                </span>
+              </button>
+            )}
 
           </nav>
         )}
